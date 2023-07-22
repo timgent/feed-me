@@ -1,0 +1,19 @@
+{
+  "name": "feed-me",
+  "version": "1.0.0",
+  "description": "Gather feedback from the people you work most closely with",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node_modules/.bin/nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tim Gent",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/bolt": "^3.13.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
