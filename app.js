@@ -1,5 +1,6 @@
 const { App, ExpressReceiver } = require("@slack/bolt");
-const { FileInstallationStore } = require("@slack/oauth");
+const axios = require("axios");
+const FormData = require("form-data");
 
 const express = require("express");
 
@@ -12,46 +13,41 @@ const receiver = new ExpressReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   clientId: process.env.SLACK_CLIENT_ID,
   clientSecret: process.env.SLACK_CLIENT_SECRET,
-  stateSecret: "my-state-secret",
-  scopes: ["commands", "chat:write"],
-  installationStore: new FileInstallationStore({}),
 });
 
-// Initializes your app with your bot token and signing secret
+expressApp.get("/health-check", (req, res) => {
+  res.writeHead(200);
+  res.end(`Things are going just fine at ${req.headers.host}!`);
+});
+
+expressApp.get("/install", (_req, res) => {
+  res.writeHead(200);
+  res.end(
+    `<a href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook,commands&user_scope=im:read,im:history&client_id=5531295706209.5612380644420&redirect_uri=https://62f3-81-78-96-145.ngrok-free.app/authorize">Install Feed Me to Slack</a>`
+  );
+});
+
+expressApp.get("/authorize", async (req, res) => {
+  res.writeHead(200);
+  const formData = new FormData();
+  formData.append("code", req.query.code);
+  formData.append("client_id", process.env.SLACK_CLIENT_ID);
+  formData.append("client_secret", process.env.SLACK_CLIENT_SECRET);
+
+  slackRes = await axios.post(
+    "https://slack.com/api/oauth.v2.access",
+    formData
+  );
+  console.log("Slack Response is:");
+  console.log(slackRes);
+
+  res.end("Woohoo!");
+});
+
 const app = new App({
+  receiver: receiver,
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  customRoutes: [
-    {
-      path: "/health-check",
-      method: ["GET"],
-      handler: (req, res) => {
-        console.log({ req });
-        res.writeHead(200);
-        res.end(`Things are going just fine at ${req.headers.host}!`);
-      },
-    },
-    {
-      path: "/install",
-      method: ["GET"],
-      handler: (req, res) => {
-        res.writeHead(200);
-        res.end(
-          `<a href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook,commands&user_scope=im:read,im:history&client_id=5531295706209.5612380644420&redirect_uri=https://62f3-81-78-96-145.ngrok-free.app/authorize">Install Feed Me to Slack</a>`
-        );
-      },
-    },
-    {
-      path: "/authorize",
-      method: ["GET"],
-      handler: (req, res) => {
-        res.writeHead(200);
-        console.log("REQUEST PARAMS ARE: ");
-        console.log(req);
-        res.end("Woohoo!");
-      },
-    },
-  ],
 });
 
 (async () => {
