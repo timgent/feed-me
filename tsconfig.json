@@ -11,6 +11,7 @@
       "#pkg/*": ["./src/*"]
     },
     "types": [],
+    "typeRoots": ["./src/environment.d.ts", "./node_modules/@types"],
     "declaration": true,
     "declarationMap": true,
     "outDir": "./built",
@@ -18,10 +19,12 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "target": "ES2017",
+    "lib": ["es2022"],
+    "target": "es2022",
     "incremental": true,
     "skipLibCheck": true,
-    "moduleResolution": "node"
+    "module": "Node16",
+    "moduleResolution": "node16"
   },
   "include": ["./src/**/*"],
   "exclude": ["**/node_modules"]

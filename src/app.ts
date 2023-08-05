@@ -31,8 +31,8 @@ expressApp.get("/authorize", async (req, res) => {
   res.writeHead(200);
   const formData = new FormData();
   formData.append("code", req.query["code"]);
-  formData.append("client_id", process.env.SLACK_CLIENT_ID);
-  formData.append("client_secret", process.env.SLACK_CLIENT_SECRET);
+  formData.append("client_id", process.env["SLACK_CLIENT_ID"]);
+  formData.append("client_secret", process.env["SLACK_CLIENT_SECRET"]);
 
   const slackRes = await axios.post(
     "https://slack.com/api/oauth.v2.access",
@@ -52,7 +52,7 @@ const app = new App({
 
 (async () => {
   // Start your app
-  await app.start(process.env.PORT || 3000);
+  await app.start(process.env["PORT"] || 3000);
   const conversations = await app.client.users.conversations();
   // app.client.chat.postMessage({
   //   channel: "C05F8KLBN90",
