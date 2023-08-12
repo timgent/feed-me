@@ -38,8 +38,10 @@ expressApp.get("/authorize", async (req, res) => {
     "https://slack.com/api/oauth.v2.access",
     formData
   );
-  console.log("Slack Response is:");
-  console.log(slackRes);
+  console.log("Authed user details are:");
+  console.log(slackRes.data.authed_user);
+  const authed_user_id = slackRes.data.authed_user.id;
+  const authed_user_token = slackRes.data.authed_user.id;
 
   res.end("Woohoo!");
 });
