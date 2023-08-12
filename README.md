@@ -9,12 +9,10 @@ npm run dev
 In a separate terminal:
 
 ```bash
-ngrok http 3000
+ssh -R cursim.serveo.net:80:localhost:3000 serveo.net
 ```
 
-Make sure any ngrok links in the code are updated to point to the new ngrok endpoint!
-
-Make sure the Slack app has the ngrok API with `/authorize` added to the allowed redirect URLs - https://api.slack.com/apps/A05J0B6JYCC/oauth?
+Make sure the Slack app has the https://cursim.serveo.net/authorize URL added to the allowed redirect URLs - https://api.slack.com/apps/A05J0B6JYCC/oauth?
 
 ## Endpoints/functionality
 

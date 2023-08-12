@@ -23,7 +23,7 @@ expressApp.get("/health-check", (req, res) => {
 expressApp.get("/install", (_req, res) => {
   res.writeHead(200);
   res.end(
-    `<a href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook,commands&user_scope=im:read,im:history&client_id=5531295706209.5612380644420&redirect_uri=https://0495-81-78-96-145.ngrok-free.app/authorize">Install Feed Me to Slack</a>`
+    `<a href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook,commands&user_scope=im:read,im:history&client_id=5531295706209.5612380644420&redirect_uri=https://cursim.serveo.net/authorize">Install Feed Me to Slack</a>`
   );
 });
 
