@@ -11,8 +11,11 @@ datasource db {
 }
 
 model SlackUsers {
-  id String @id @unique
+  id Int @id @default(autoincrement())
+  slack_user_id String 
   createdAt DateTime @default(now())
   scope String
   access_token String
+
+  @@map("slack_users")
 }

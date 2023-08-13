@@ -3,6 +3,7 @@ import axios from "axios";
 import FormData from "form-data";
 
 import express from "express";
+import { prisma } from "./db";
 
 require("dotenv").config();
 
@@ -27,6 +28,16 @@ expressApp.get("/install", (_req, res) => {
   );
 });
 
+type SlackAuthResponse = {
+  authed_user: SlackUser;
+};
+
+type SlackUser = {
+  id: string;
+  access_token: string;
+  scope: string;
+};
+
 expressApp.get("/authorize", async (req, res) => {
   res.writeHead(200);
   const formData = new FormData();
@@ -34,14 +45,19 @@ expressApp.get("/authorize", async (req, res) => {
   formData.append("client_id", process.env["SLACK_CLIENT_ID"]);
   formData.append("client_secret", process.env["SLACK_CLIENT_SECRET"]);
 
-  const slackRes = await axios.post(
+  const slackRes = await axios.post<SlackAuthResponse>(
     "https://slack.com/api/oauth.v2.access",
     formData
   );
   console.log("Authed user details are:");
   console.log(slackRes.data.authed_user);
-  const authed_user_id = slackRes.data.authed_user.id;
-  const authed_user_token = slackRes.data.authed_user.id;
+  await prisma.slackUsers.create({
+    data: {
+      slack_user_id: slackRes.data.authed_user.id,
+      access_token: slackRes.data.authed_user.access_token,
+      scope: slackRes.data.authed_user.scope,
+    },
+  });
 
   res.end("Woohoo!");
 });
