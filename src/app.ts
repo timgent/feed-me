@@ -1,9 +1,8 @@
 import { App, ExpressReceiver } from "@slack/bolt";
-import axios from "axios";
-import FormData from "form-data";
 
 import express from "express";
 import { prisma } from "./db";
+import { getUserToken } from "./slack";
 
 require("dotenv").config();
 
@@ -24,42 +23,30 @@ expressApp.get("/health-check", (req, res) => {
 expressApp.get("/install", (_req, res) => {
   res.writeHead(200);
   res.end(
-    `<a href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook,commands&user_scope=im:read,im:history&client_id=5531295706209.5612380644420&redirect_uri=https://cursim.serveo.net/authorize">Install Feed Me to Slack</a>`
+    `<a href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook,commands&user_scope=im:read,im:history,mpim:read,channels:history,groups:read&client_id=5531295706209.5612380644420&redirect_uri=https://cursim.serveo.net/authorize">Install Feed Me to Slack</a>`
   );
 });
 
-type SlackAuthResponse = {
-  authed_user: SlackUser;
-};
-
-type SlackUser = {
-  id: string;
-  access_token: string;
-  scope: string;
-};
-
 expressApp.get("/authorize", async (req, res) => {
-  res.writeHead(200);
-  const formData = new FormData();
-  formData.append("code", req.query["code"]);
-  formData.append("client_id", process.env["SLACK_CLIENT_ID"]);
-  formData.append("client_secret", process.env["SLACK_CLIENT_SECRET"]);
+  if (typeof req.query["code"] === "string") {
+    res.writeHead(200);
+    const slackAuthResponse = await getUserToken(req.query["code"]);
+    const slackUser = {
+      slackUserId: slackAuthResponse.data.authed_user.id,
+      accessToken: slackAuthResponse.data.authed_user.access_token,
+      scope: slackAuthResponse.data.authed_user.scope,
+    };
+    await prisma.slackUser.upsert({
+      where: { slackUserId: slackUser.slackUserId },
+      update: slackUser,
+      create: slackUser,
+    });
 
-  const slackRes = await axios.post<SlackAuthResponse>(
-    "https://slack.com/api/oauth.v2.access",
-    formData
-  );
-  console.log("Authed user details are:");
-  console.log(slackRes.data.authed_user);
-  await prisma.slackUsers.create({
-    data: {
-      slack_user_id: slackRes.data.authed_user.id,
-      access_token: slackRes.data.authed_user.access_token,
-      scope: slackRes.data.authed_user.scope,
-    },
-  });
-
-  res.end("Woohoo!");
+    res.end("Nice one - you've successfully authorized feed me!");
+  } else {
+    res.writeHead(400);
+    res.end("Bad code given");
+  }
 });
 
 const app = new App({
@@ -69,14 +56,16 @@ const app = new App({
 });
 
 (async () => {
-  // Start your app
   await app.start(process.env["PORT"] || 3000);
-  const conversations = await app.client.users.conversations();
-  // app.client.chat.postMessage({
-  //   channel: "C05F8KLBN90",
-  //   text: "Moop",
-  // });
-  console.log(conversations);
+  const slackUser = await prisma.slackUser.findFirst();
+  const channels = await app.client.users.conversations({
+    token: process.env["SLACK_BOT_TOKEN"],
+    types: "public_channel,private_channel,mpim,im",
+  });
+  if (channels.channels) {
+    console.log(channels.channels.map((c) => c.name));
+    console.log(channels.channels);
+  }
 
   console.log("⚡️ Bolt app is running!");
 })();

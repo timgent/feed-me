@@ -10,12 +10,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model SlackUsers {
+model SlackUser {
   id Int @id @default(autoincrement())
-  slack_user_id String 
+  slackUserId String @unique
   createdAt DateTime @default(now())
   scope String
-  access_token String
+  accessToken String
 
   @@map("slack_users")
 }
