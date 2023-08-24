@@ -2,7 +2,7 @@ import { App, ExpressReceiver } from "@slack/bolt";
 
 import express from "express";
 import { prisma } from "./db";
-import { getUserToken } from "./slack";
+import { getTopPeopleSpokenTo, getUserToken } from "./slack";
 
 require("dotenv").config();
 
@@ -55,17 +55,28 @@ const app = new App({
   signingSecret: process.env["SLACK_SIGNING_SECRET"],
 });
 
+app.command("/feedme", async ({ command, ack, respond }) => {
+  console.log("FEED ME!!!");
+  getTopPeopleSpokenTo(command.user_id, 1, 1);
+  await ack();
+  await respond("Suggested people for feedback coming right up...");
+  await respond("Some people...");
+});
+
 (async () => {
   await app.start(process.env["PORT"] || 3000);
-  const slackUser = await prisma.slackUser.findFirst();
-  const channels = await app.client.users.conversations({
-    token: process.env["SLACK_BOT_TOKEN"],
-    types: "public_channel,private_channel,mpim,im",
-  });
-  if (channels.channels) {
-    console.log(channels.channels.map((c) => c.name));
-    console.log(channels.channels);
-  }
+
+  // const slackUser = await prisma.slackUser.findFirst();
+  // const channels = await app.client.users.conversations({
+  //   token: process.env["SLACK_BOT_TOKEN"],
+  //   types: "public_channel,private_channel,mpim,im",
+  // });
+  // if (channels.channels) {
+  //   console.log(channels.channels.map((c) => c.name));
+  //   console.log(channels.channels);
+  // }
 
   console.log("⚡️ Bolt app is running!");
 })();
+
+export { app };
