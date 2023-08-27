@@ -1,7 +1,6 @@
 import { SlackUser } from "@prisma/client";
 import axios from "axios";
 import FormData from "form-data";
-import * as R from "remeda";
 import util from "util";
 import { Channel } from "@slack/web-api/dist/response/UsersConversationsResponse";
 import { prisma } from "./db";
