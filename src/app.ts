@@ -23,7 +23,7 @@ expressApp.get("/health-check", (req, res) => {
 expressApp.get("/install", (_req, res) => {
   res.writeHead(200);
   res.end(
-    `<a href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook,commands&user_scope=im:read,im:history,mpim:read,channels:history,groups:read&client_id=5531295706209.5612380644420&redirect_uri=https://cursim.serveo.net/authorize">Install Feed Me to Slack</a>`
+    `<a href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook,commands&user_scope=im:read,im:history,mpim:read,channels:history,groups:read&client_id=5531295706209.5612380644420&redirect_uri=https://timmeh-bee-bop.serveo.net/authorize">Install Feed Me to Slack</a>`
   );
 });
 
@@ -57,25 +57,21 @@ const app = new App({
 
 app.command("/feedme", async ({ command, ack, respond }) => {
   console.log("FEED ME!!!");
-  getTopPeopleSpokenTo(command.user_id, 1, 1);
   await ack();
   await respond("Suggested people for feedback coming right up...");
-  await respond("Some people...");
+  const topPeople = await getTopPeopleSpokenTo(command.user_id, 1, 1);
+  const responseStrings = topPeople.map(({ userId, score }) => {
+    return `<@${userId}> was a top person with a score of ${score}!`;
+  });
+  await Promise.all(
+    responseStrings.map(async (responseString) => {
+      await respond(responseString);
+    })
+  );
 });
 
 (async () => {
   await app.start(process.env["PORT"] || 3000);
-
-  // const slackUser = await prisma.slackUser.findFirst();
-  // const channels = await app.client.users.conversations({
-  //   token: process.env["SLACK_BOT_TOKEN"],
-  //   types: "public_channel,private_channel,mpim,im",
-  // });
-  // if (channels.channels) {
-  //   console.log(channels.channels.map((c) => c.name));
-  //   console.log(channels.channels);
-  // }
-
   console.log("⚡️ Bolt app is running!");
 })();
 

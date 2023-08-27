@@ -9,10 +9,10 @@ npm run dev
 In a separate terminal:
 
 ```bash
-ssh -R cursim.serveo.net:80:localhost:3000 serveo.net
+ssh -R timmeh-bee-bop.serveo.net:80:localhost:3000 serveo.net
 ```
 
-Make sure the Slack app has the https://cursim.serveo.net/authorize URL added to the allowed redirect URLs - https://api.slack.com/apps/A05J0B6JYCC/oauth?
+Make sure the Slack app has the https://timmeh-bee-bop.serveo.net/authorize URL added to the allowed redirect URLs - https://api.slack.com/apps/A05J0B6JYCC/oauth?
 
 ## Endpoints/functionality
 
